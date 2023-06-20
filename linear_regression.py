@@ -22,7 +22,7 @@ def normalize_data(x_train, x_test) -> tuple:
     return normalized_x_train, normalized_x_test
 
 
-def flatten(l):
+def flatten(l) -> list:
     return [item for sublist in l for item in sublist]
 
 
