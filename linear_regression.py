@@ -14,11 +14,12 @@ def parse_data(file_name) -> np.array:
     return np.array(float_data)
 
 
-def normalize_data(data):
-    min_vals = np.min(data, axis=0)
-    max_vals = np.max(data, axis=0)
-    normalized_data = (data - min_vals) / (max_vals - min_vals)
-    return normalized_data
+def normalize_data(x_train, x_test) -> tuple:
+    min_vals = np.min(x_train, axis=0)
+    max_vals = np.max(x_train, axis=0)
+    normalized_x_train = (x_train - min_vals) / (max_vals - min_vals)
+    normalized_x_test = (x_test - min_vals) / (max_vals - min_vals)
+    return normalized_x_train, normalized_x_test
 
 
 def flatten(l):
@@ -27,18 +28,19 @@ def flatten(l):
 
 def train_test_split(data) -> tuple:
     # in order to shuffle but still get the same result every time
-    np.random.seed(42)
+    np.random.seed(471)
     np.random.shuffle(data)
     percentile_75 = int(len(data) * 0.75)
 
-    features = normalize_data(data[:, :-1])
-    labels = data[:, -1:]
     # assume the label will always be the last data given
-    x_train = features[:percentile_75, :]
-    x_test = features[percentile_75:, :]
-    y_train = labels[:percentile_75, :]
-    y_test = labels[percentile_75:, :]
-    return x_train, x_test, flatten(y_train), flatten(y_test)
+    x_train = data[:percentile_75, :-1]
+    x_test = data[percentile_75:, :-1]
+    y_train = data[:percentile_75, -1:]
+    y_test = data[percentile_75:, -1:]
+
+    x_train, x_test = normalize_data(x_train, x_test)
+    y_train, y_test = flatten(y_train), flatten(y_test)
+    return x_train, x_test, y_train, y_test
 
 
 def add_square_dim(x_train, x_test) -> tuple:
@@ -64,7 +66,7 @@ def compute_params(data, labels) -> tuple:
     w = np.zeros(data.shape[1], dtype=np.float64)
     b = 0
     alpha = 0.01
-    for iteration in range(10000):
+    for iteration in range(6000):
         gradient_w = np.dot(((np.dot(data, w) + b) - labels), data) / len(labels)
         gradient_b = np.sum(np.dot(data, w) + b - labels) / len(labels)
         new_w = w - alpha * gradient_w
