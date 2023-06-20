@@ -64,14 +64,15 @@ def compute_params(data, labels) -> tuple:
     w = np.zeros(data.shape[1], dtype=np.float64)
     b = 0
     alpha = 0.01
-    for iteration in range(1000):
+    for iteration in range(10000):
         gradient_w = np.dot(((np.dot(data, w) + b) - labels), data) / len(labels)
         gradient_b = np.sum(np.dot(data, w) + b - labels) / len(labels)
         new_w = w - alpha * gradient_w
         new_b = b - alpha * gradient_b
-        if np.abs(np.mean(w - new_w)) < 1E-10 and np.abs(np.mean(b - new_b)) < 1E-10:
-            print("Breaking early")
-            break
+        if np.abs(np.mean(w - new_w)) < alpha / 10 and np.abs(np.mean(b - new_b)) < alpha / 10:
+            print("Change in w, b smaller than learning rate/10. Changing learning rate in iteration ", iteration,
+                  ", from ", alpha, " to ", alpha / 10)
+            alpha = alpha / 10
         else:
             w = new_w
             b = new_b
@@ -80,7 +81,7 @@ def compute_params(data, labels) -> tuple:
 
 def MSE(predictions, y_test) -> np.double:
     squared_diff = [(actual - predicted) ** 2 for actual, predicted in zip(y_test, predictions)]
-    mse = sum(squared_diff) / (2 * len(y_test))
+    mse = sum(squared_diff) / (2 * len(y_test))  # diving by 2 because of the lost function formula
     return mse
 
 
